@@ -1,0 +1,55 @@
+A. why you solved the problem the way you did
+
+The homework is actually a depth-first search problem. So I solved the problem
+by recursively checking the leftmost rule until reach an unmatched terminal symbol.
+So this function will find the terminal symbols and compare with fragments.
+Since sometimes there are multiple rules may apply to one nonterminal symbols,
+I also wrote a function to switch to next possible rule in case of backtrace.
+The two functions will recursively call each other and themselves.
+And the final parse_prefix will use them. At the beginning,
+the derivation list is empty at first. It adds by trying one rule and
+accumulates to next rule when succeed.
+When a possible list is exhasuted and still no match found,
+or when the acceptor rejects all possible suffixes, program will terminated 
+with None. Otherwise, it would return something as requested, according to the acceptor.
+
+
+B: other approaches that you considered and rejected (and why you rejected them) 
+
+Earlier I try to write two functions: one is recursively search deeper
+until a terminal symbol is reached; then call
+another function to match the pattern with fragment.
+However, when I actually tried to write this, I found that it still need a 
+function to record other paralell possible rules and backtrace.
+Also, later I found the match part can be done along with checking terminals.
+By writing and revising, I finally got this solution. 
+
+
+C: any weaknesses in your solution in the context of its intended application. 
+
+I think my solution cannot handle grammar with blind alley rules.
+If any rule is not defined, 
+the production function can not match the nontermial to reach an end,
+lead to the exception of function cannot match.
+Or when the rules that repeatedly call themselves or each other, it will
+end up in an infinite loop.
+So the weakness is the grammar be can used is limited.
+
+ 
+D: Illustrate weaknesses by test cases that fail with your implementation.
+
+For example:
+let fail_grammar = 
+  (Expr,
+   function
+     | Expr ->
+         [[N Term; N Binop; N Expr];
+          [N Binop]]
+     | Binop ->
+	      [[T"+"];
+	      [T"-"]])
+
+In this grammar, the rule Expr -> [N Term; N Binop; N Expr] is blind alley
+since Term is not defined. As a result, when trying to search deeper for Term,
+the production function of the grammar cannnot find a match,
+thus throw an exception and program end with error.
